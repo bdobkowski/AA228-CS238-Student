@@ -1,0 +1,2 @@
+#!/bin/bash
+/home/bdobkowski/Stanford/AA228/AA228-CS238-Student/project1/project1.py /home/bdobkowski/Stanford/AA228/AA228-CS238-Student/project1/data/small.csv /home/bdobkowski/Stanford/AA228/AA228-CS238-Student/project1/output/small.txt
