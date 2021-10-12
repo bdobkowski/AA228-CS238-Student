@@ -35,7 +35,7 @@ class K2Search:
         DG = nx.DiGraph()
         DG.add_nodes_from(self.idx2names)
         print('Total nodes: {}'.format(len(self.ordering)))
-        for k, i in enumerate(self.ordering):
+        for k, i in tqdm(enumerate(self.ordering)):
             y = bayesian_score(DG, data, self.idx2names, self.variables)            
             while True:
                 y_best = -np.inf
@@ -69,7 +69,7 @@ class OppLocalSearch:
     def fit(self, data, initial_graph):
         G = initial_graph
         y = bayesian_score(G, data, self.idx2names, self.variables)
-        for k in range(self.maxiter):
+        for k in tqdm(range(self.maxiter)):
             G_prime = random_graph_neighbor(G)
             cycles = [c for c in nx.algorithms.simple_cycles(G_prime)]
             if cycles:
@@ -112,7 +112,7 @@ def compute(infile, outfile):
     begin_time = datetime.datetime.now()
     
     # Runs K2 Search _K2_ITER_ times, saves best result
-    for i in range(_K2_ITER_):
+    for i in tqdm(range(_K2_ITER_)):
         print('Initialization {}'.format(i+1))
         search = K2Search(variables, idx2names)
         search.shuffle()
