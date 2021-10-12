@@ -1,0 +1,35 @@
+Initialization 1
+Total nodes: 8
+k2 result: -3840.3834733345434
+Initialization 2
+Total nodes: 8
+k2 result: -3847.9203295367292
+Initialization 3
+Total nodes: 8
+k2 result: -3840.57766376043
+Initialization 4
+Total nodes: 8
+k2 result: -3825.3579203904897
+Initialization 5
+Total nodes: 8
+k2 result: -3835.67942521279
+Initialization 6
+Total nodes: 8
+k2 result: -3833.22659216801
+Initialization 7
+Total nodes: 8
+k2 result: -3830.3983622893466
+Initialization 8
+Total nodes: 8
+k2 result: -3864.9137297859406
+Initialization 9
+Total nodes: 8
+k2 result: -3837.642955469609
+Initialization 10
+Total nodes: 8
+k2 result: -3825.6860294185767
+ols result: -3823.8815513790946
+
+==============================
+Final Bayesian Score: -3823.8815513790946
+0:04:02.540877
