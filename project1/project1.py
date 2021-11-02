@@ -9,9 +9,10 @@ import scipy.special as sp
 import random
 from tqdm import tqdm
 import datetime
+from multiprocessing import Process, Manager
 
-_K2_ITER_  = 10 # Number of iterations for K2 Search algorithm
-_OLS_ITER_ = 1000 # Number of iterations for Opportunistic Local Search
+_K2_ITER_  = 8 # Number of iterations for K2 Search algorithm
+_OLS_ITER_ = 400 # Number of iterations for Opportunistic Local Search
 
 # Random variable class
 class Variable:
@@ -40,7 +41,7 @@ class K2Search:
             while True:
                 y_best = -np.inf
                 j_best = 0                
-                for j in self.ordering[0:k]:
+                for num, j in enumerate(self.ordering[0:k]):
                     if not DG.has_edge(j, i):
                         DG.add_edge(j, i)
                         y_prime = bayesian_score(DG, data, self.idx2names, self.variables)
@@ -48,6 +49,8 @@ class K2Search:
                             y_best = y_prime
                             j_best = j
                         DG.remove_edge(j, i)
+                    if num > 4:
+                        break 
                 if y_best > y:
                     y = y_best
                     DG.add_edge(j_best, i)
@@ -111,17 +114,22 @@ def compute(infile, outfile):
     res        = K2Search(variables, idx2names)
     begin_time = datetime.datetime.now()
     
-    # Runs K2 Search _K2_ITER_ times, saves best result
-    for i in tqdm(range(_K2_ITER_)):
-        print('Initialization {}'.format(i+1))
-        search = K2Search(variables, idx2names)
-        search.shuffle()
-        search.fit(data)
-        print('k2 result: {}'.format(search.bs))
-        if search.bs > bs_to_beat:
-            res = search
-            bs_to_beat = search.bs
-            
+    # # Runs K2 Search _K2_ITER_ times, saves best result
+    k2res = Manager().dict()
+    proclist = []
+    for p in range(_K2_ITER_):
+        proc = Process(target=k2_iteration, args=(variables, idx2names, data, k2res, p))
+        proclist.append(proc)
+        proc.start()
+    for proc in proclist:
+        proc.join()
+    for kres in k2res.values():
+        if kres.bs > bs_to_beat:
+            res = kres
+            bs_to_beat = kres.bs
+    
+    print('Best K2 Result: {}'.format(res.bs))
+
     # Runs OLS using best K2 graph as initialization
     ols = OppLocalSearch(variables, idx2names)
     ols.fit(data, res.graph)
@@ -134,6 +142,14 @@ def compute(infile, outfile):
     plot_graph(ols.graph, fname.split('.')[0])
     write_gph(ols.graph, idx2names, outfile)
     pass
+
+# One iteration of K2 search, using a random ordering
+def k2_iteration(variables, idx2names, data, k2res, procnum):
+    obj = K2Search(variables, idx2names)
+    obj.shuffle()
+    obj.fit(data)
+    print('k2 result: {}'.format(obj.bs))
+    k2res[procnum] = obj
 
 # Returns bayesian score of input graph
 def bayesian_score(graph, data, idx2names, variables):
